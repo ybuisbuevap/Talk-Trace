@@ -19,8 +19,8 @@ export const ownerMiddleware = (req, res, next) => {
         ownerToken = generateOwnerToken();
         res.cookie(COOKIE_NAME, ownerToken, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // "none" required for cross-origin
+            secure: process.env.NODE_ENV === "production", // "none" requires secure=true
             maxAge: COOKIE_MAX_AGE,
         });
         logger.debug({ msg: "New owner token issued" });
