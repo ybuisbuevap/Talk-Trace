@@ -52,6 +52,15 @@ app.get("/api/health", (req, res) => {
     });
 });
 
+// Debug — check cookie received
+app.get("/api/debug/cookie", (req, res) => {
+    res.json({
+        ownerToken: req.ownerToken ? req.ownerToken.slice(0, 8) + "..." : null,
+        cookieReceived: !!req.cookies?.talktrace_owner,
+        allCookies: Object.keys(req.cookies || {}),
+    });
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
     logger.error({ err: err.message, path: req.path }, "Unhandled error");

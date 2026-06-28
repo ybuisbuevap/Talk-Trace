@@ -67,7 +67,9 @@ export default function Home() {
     // Connect SSE for progress updates
     const connectSSE = (sessionId) => {
         const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
-        const es = new EventSource(`${API_BASE}/api/upload/progress/${sessionId}`);
+        const es = new EventSource(`${API_BASE}/api/upload/progress/${sessionId}`, {
+            withCredentials: true, // send cookies cross-origin
+        });
         eventSourceRef.current = es;
 
         es.onmessage = (e) => {
