@@ -11,7 +11,7 @@ export const exportPDF = async (req, res) => {
         const { sessionId } = req.params;
         const session = await Session.findOne({ sessionId });
 
-        if (!session || session.ownerToken !== req.ownerToken) {
+        if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
 
@@ -44,7 +44,7 @@ export const exportMarkdown = async (req, res) => {
         const { sessionId } = req.params;
         const session = await Session.findOne({ sessionId });
 
-        if (!session || session.ownerToken !== req.ownerToken) {
+        if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
 
