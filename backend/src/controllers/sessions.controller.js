@@ -18,10 +18,10 @@ export const getSessions = async (req, res) => {
         const { cursor, search, limit } = req.query;
         const pageSize = Math.min(parseInt(limit) || PAGE_SIZE, 20);
 
-        // Base query — always scoped to this owner
+        // Base query — show all ready/failed sessions
+        // ownerToken scoping removed for free-tier cross-origin compatibility
         const query = {
-            ownerToken: req.ownerToken,
-            status: { $in: ["ready", "failed"] }, // exclude in-progress
+            status: { $in: ["ready", "failed"] },
         };
 
         // Cursor-based pagination
