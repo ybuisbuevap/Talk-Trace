@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { uploadFile, getStatus, streamProgress } from "../controllers/upload.controller.js";
+import { uploadFile, getStatus, streamProgress, initOwner } from "../controllers/upload.controller.js";
 
 const router = express.Router();
 
@@ -21,6 +21,7 @@ const upload = multer({
     },
 });
 
+router.get("/init", initOwner); // sets ownerToken cookie before upload
 router.post("/", upload.single("file"), uploadFile);
 router.get("/status/:sessionId", getStatus);
 router.get("/progress/:sessionId", streamProgress); // SSE endpoint

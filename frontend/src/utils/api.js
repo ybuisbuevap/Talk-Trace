@@ -9,7 +9,12 @@ const api = axios.create({
 });
 
 // Upload audio/video file
+// First calls /init to ensure ownerToken cookie is set before upload
 export const uploadFile = async (file, onProgress) => {
+    // Init call — ensures cookie is set on this domain before upload
+    // Solves cross-origin cookie timing issue
+    await api.get("/api/upload/init");
+
     const formData = new FormData();
     formData.append("file", file);
     const res = await api.post("/api/upload", formData, {

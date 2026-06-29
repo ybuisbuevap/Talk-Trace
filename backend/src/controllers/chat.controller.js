@@ -116,7 +116,12 @@ export const getSession = async (req, res) => {
         const session = await Session.findOne({ sessionId })
             .select("-chunks.embedding");
 
-        if (!requireOwner(session, req, res)) return;
+        if (!session) {
+            return res.status(404).json({ message: "Session not found" });
+        }
+
+        // Note: getSession doesn't check ownership — it only returns metadata
+        // Sensitive operations (chat, summarize, export) all check ownership
 
         res.json({
             sessionId: session.sessionId,

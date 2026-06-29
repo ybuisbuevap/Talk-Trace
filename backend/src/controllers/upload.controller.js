@@ -8,6 +8,18 @@ import { sseManager } from "../services/sse.service.js";
 import logger from "../utils/logger.js";
 
 /**
+ * GET /api/upload/init
+ * Call this BEFORE uploading to ensure ownerToken cookie is set.
+ * Solves cross-origin cookie timing issue — cookie is set on this
+ * request so it's available on the subsequent upload request.
+ */
+export const initOwner = async (req, res) => {
+    // ownerMiddleware already ran and set the cookie
+    // Just return the token so frontend can confirm it's set
+    res.json({ ready: true });
+};
+
+/**
  * POST /api/upload
  * Saves file to disk, creates session, queues Agenda job.
  * Returns immediately — processing happens in background.
