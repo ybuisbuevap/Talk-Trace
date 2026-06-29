@@ -17,9 +17,11 @@ export const chatWithAgent = async (req, res) => {
             return res.status(400).json({ message: "sessionId and message required" });
         }
 
-        // Load session and verify ownership
+        // Load session
         const session = await Session.findOne({ sessionId });
-        if (!requireOwner(session, req, res)) return;
+        if (!session) {
+            return res.status(404).json({ message: "Session not found" });
+        }
 
         if (session.status !== "ready") {
             return res.status(400).json({
@@ -160,8 +162,7 @@ export const summarizeSession = async (req, res) => {
         const { sessionId } = req.params;
         const session = await Session.findOne({ sessionId }).lean();
 
-        // Manual ownership check — .lean() removes instance methods
-        if (!session || session.ownerToken !== req.ownerToken) {
+        if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
 
