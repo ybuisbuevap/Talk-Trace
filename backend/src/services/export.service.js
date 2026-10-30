@@ -1,6 +1,24 @@
 import PDFDocument from "pdfkit";
 import logger from "../utils/logger.js";
 
+const mergeTurns = (segments = []) => {
+    const turns = [];
+    for (const seg of segments) {
+        const last = turns[turns.length - 1];
+        if (last && last.speaker === seg.speaker) {
+            last.text += " " + seg.text;
+        } else {
+            turns.push({ speaker: seg.speaker, start: seg.start, text: seg.text });
+        }
+    }
+    return turns;
+};
+
+const formatTime = (sec) => {
+    const total = Math.floor(sec || 0);
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+};
+
 /**
  * generatePDF — creates a PDF buffer from session data.
  * Returns a Buffer ready to stream to client.
@@ -132,14 +150,20 @@ export const generatePDF = (session) => {
             // ── Transcript ──
             if (session.transcript?.fullText) {
                 sectionHeader(doc, "Full Transcript");
-                doc
-                    .fontSize(9.5)
-                    .font("Helvetica")
-                    .fillColor("#3A3A4A")
-                    .text(session.transcript.fullText, 60, doc.y, {
-                        width: W,
-                        lineGap: 3,
+                const turns = mergeTurns(session.transcript.segments);
+
+                if (turns.length === 0) {
+                    doc.fontSize(9.5).font("Helvetica").fillColor("#3A3A4A")
+                        .text(session.transcript.fullText, 60, doc.y, { width: W, lineGap: 3 });
+                } else {
+                    turns.forEach((turn) => {
+                        doc.fontSize(9).font("Helvetica-Bold").fillColor("#6B6B80")
+                            .text(`${turn.speaker}  ${formatTime(turn.start)}`, 60, doc.y, { width: W });
+                        doc.fontSize(9.5).font("Helvetica").fillColor("#3A3A4A")
+                            .text(turn.text, 60, doc.y, { width: W, lineGap: 3 });
+                        doc.moveDown(0.7);
                     });
+                }
                 doc.moveDown(1.5);
             }
 
@@ -220,9 +244,18 @@ export const generateMarkdown = (session) => {
 
     if (session.transcript?.fullText) {
         lines.push("## Full Transcript");
-        lines.push("```");
-        lines.push(session.transcript.fullText);
-        lines.push("```");
+        lines.push("");
+        const turns = mergeTurns(session.transcript.segments);
+        if (turns.length === 0) {
+            lines.push(session.transcript.fullText);
+        } else {
+            turns.forEach((turn) => {
+                lines.push(`**${turn.speaker}** (${formatTime(turn.start)})`);
+                lines.push("");
+                lines.push(turn.text);
+                lines.push("");
+            });
+        }
         lines.push("");
     }
 

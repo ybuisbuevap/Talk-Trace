@@ -191,9 +191,7 @@ export default function Chat() {
 
                 {activePanel === "transcript" && (
                     <div style={s.scrollArea}>
-                        <pre style={s.transcriptText}>
-                            {session.transcript?.fullText || "No transcript available."}
-                        </pre>
+                        <TranscriptPanel transcript={session.transcript} />
                     </div>
                 )}
 
@@ -260,6 +258,49 @@ export default function Chat() {
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+const formatTime = (sec) => {
+    const total = Math.floor(sec || 0);
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+};
+
+// Merge consecutive segments of the same speaker into one turn
+const groupTurns = (segments) => {
+    const turns = [];
+    for (const seg of segments) {
+        const last = turns[turns.length - 1];
+        if (last && last.speaker === seg.speaker) {
+            last.text += " " + seg.text;
+        } else {
+            turns.push({ speaker: seg.speaker, start: seg.start, text: seg.text });
+        }
+    }
+    return turns;
+};
+
+function TranscriptPanel({ transcript }) {
+    const segments = transcript?.segments || [];
+    if (segments.length === 0) {
+        return (
+            <pre style={s.transcriptText}>
+                {transcript?.fullText || "No transcript available."}
+            </pre>
+        );
+    }
+    return (
+        <div style={s.turns}>
+            {groupTurns(segments).map((turn, i) => (
+                <div key={i} style={s.turn}>
+                    <div style={s.turnHeader}>
+                        <span style={s.turnSpeaker}>{turn.speaker}</span>
+                        <span style={s.turnTime}>{formatTime(turn.start)}</span>
+                    </div>
+                    <p style={s.turnText}>{turn.text}</p>
+                </div>
+            ))}
         </div>
     );
 }
@@ -570,16 +611,22 @@ const s = {
         color: "#B0B0B0",
         marginTop: "2px",
     },
-    transcriptText: {
-        fontSize: "0.95rem",
-        color: "#A0A0A0",
-        lineHeight: 1.9,
-        whiteSpace: "pre-wrap",
-        fontFamily: "'DM Sans', sans-serif",
-        width: "100%",
-        maxWidth: "720px",
-        padding: "0 3rem",
-    },
+        transcriptText: {
+            fontSize: "0.95rem",
+            color: "#A0A0A0",
+            lineHeight: 1.9,
+            whiteSpace: "pre-wrap",
+            fontFamily: "'DM Sans', sans-serif",
+            width: "100%",
+            maxWidth: "720px",
+            padding: "0 3rem",
+        },
+        turns: { width: "100%", maxWidth: "720px", padding: "0 3rem" },
+        turn: { marginBottom: "1.6rem" },
+        turnHeader: { display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.35rem" },
+        turnSpeaker: { fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7B6EF6" },
+        turnTime: { fontSize: "0.8rem", color: "#A0A0A0" },
+        turnText: { fontSize: "0.95rem", color: "#C8C8C8", lineHeight: 1.8, margin: 0 },
     chatPanel: {
         flex: 1,
         display: "flex",

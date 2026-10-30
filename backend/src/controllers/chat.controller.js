@@ -134,8 +134,13 @@ export const getSession = async (req, res) => {
                 wordCount: session.transcript.wordCount,
                 language: session.transcript.language,
                 generatedAt: session.transcript.generatedAt,
-                // Send full text for TranscriptViewer component
                 fullText: session.transcript.fullText,
+                segments: (session.transcript.segments || []).map(seg => ({
+                    speaker: seg.speaker,
+                    text: seg.text,
+                    start: seg.start,
+                    end: seg.end,
+                })),
             },
             cache: {
                 summary: session.isCacheValid("summary") ? session.cache.summary : null,
