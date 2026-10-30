@@ -5,11 +5,11 @@ import logger from "../utils/logger.js";
 
 // Initialize Mistral LLM — singleton
 const llm = new ChatMistralAI({
-    model: "mistral-small-latest",  // faster + free tier friendly
+    model: process.env.MISTRAL_MODEL || "mistral-small-latest",
     temperature: 0.3,
     apiKey: process.env.MISTRAL_API_KEY,
-    timeout: 60000,  // 60 second timeout
-    maxRetries: 2,
+    timeout: 60000,
+    maxRetries: 0, // the Mistral client already retries on 429
 });
 
 /**

@@ -50,6 +50,14 @@ export default function Chat() {
                         content: t.content,
                     })));
                 }
+            } catch {
+                setError("Failed to load session.");
+                setLoadingSession(false);
+                return;
+            }
+
+            // Summary is optional: if it fails, transcript and chat still work
+            try {
                 const sum = await summarize(sessionId);
                 setSummaryData(sum);
                 setSession(prev => ({
@@ -62,7 +70,7 @@ export default function Chat() {
                     }
                 }));
             } catch {
-                setError("Failed to load session.");
+                setSummaryData(null);
             } finally {
                 setLoadingSession(false);
             }
